@@ -131,48 +131,67 @@ const License1 = () => {
             }}
           />
           <Modal
-            title="License Details"
-            visible={isModalVisible}
-            onCancel={() => setIsModalVisible(false)}
-          >
-                      <p>{selectedLicense && `License ID: ${selectedLicense.id}`}</p>
-                      <p>{selectedLicense && `Association: ${selectedLicense.association.name}`}</p>
-                      <p>{selectedLicense && `Status: ${selectedLicense.status.label}`}</p>
-                      <p>{selectedLicense && `Request Type: ${selectedLicense.requestType.label}`}</p>
-                      <p>
-                      {selectedLicense &&
-                          selectedLicense.menbersLicence &&
-                          selectedLicense.menbersLicence.map((member) => (
-                          <div key={member.id}>
-                          {`${member.firstname} ${member.lastname} - ${
-                          member.responsibility ? member.responsibility.label : ''
-                          }`}
-                        <br />
-                        </div>
-  ))
-}
-                      </p>
-                      <p>{selectedLicense && `Comment: ${selectedLicense.comment}`}</p>
-                      <p>Documents Licence:</p>
-                      {selectedLicense &&
-                        selectedLicense.documentsLicence.map((doc) => (
-                          <a href={doc.url} target="_blank" rel="noreferrer">
-                            {doc.name}
-                          </a>
-                        ))}
-                      <div>
-                      <Input placeholder="Comment" value={comment} onChange={(e) => setComment(e.target.value)} />
-              
-            </div>
-            <div>
-              <Button type="primary" onClick={handleAccept}>
-                Accept
-              </Button>
-              <Button type="danger" onClick={handleReject}>
-                Refusé
-              </Button>
-            </div>
-          </Modal>
+  title="License Details"
+  visible={isModalVisible}
+  onCancel={() => setIsModalVisible(false)}
+>
+  
+  <div class="mt-6 border-t border-gray-100">
+    <dl class="divide-y divide-gray-100">
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">License ID</dt>
+        <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2">{selectedLicense && selectedLicense.id}</dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">Association</dt>
+        <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2">{selectedLicense && selectedLicense.association.name}</dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">Status</dt>
+        <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2">{selectedLicense && selectedLicense.status.label}</dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">Request Type</dt>
+        <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2">{selectedLicense && selectedLicense.requestType.label}</dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+  <dt class="text-sm font-medium leading-6 text-gray-900">Members</dt>
+  <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2">
+    {selectedLicense &&
+      selectedLicense.menbersLicence &&
+      selectedLicense.menbersLicence.map((member) => (
+        <div key={member.id}>
+          {`${member.firstname} ${member.lastname} - ${member.responsibility ? member.responsibility.label : ''}`}
+          <br />
+        </div>
+      ))}
+  </dd>
+</div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">Comment</dt>
+        <dd class="mt-1 text-sm leading-6 text-gray-700 sm:col-span-2">{selectedLicense && selectedLicense.comment}</dd>
+      </div>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm font-medium leading-6 text-gray-900">Documents License</dt>
+        <dd class="mt-2 text-sm text-gray-900 sm:col-span-2">
+          
+        </dd>
+      </div>
+    </dl>
+  </div>
+  <div>
+    <Input placeholder="Comment" value={comment} onChange={(e) => setComment(e.target.value)} />
+  </div>
+  <div class="flex justify-end mt-6">
+    <Button  onClick={handleAccept} class="mr-2 text-black hover:bg-lime-600" >
+      Accept
+    </Button>
+    <Button  onClick={handleReject} class="mr-2 text-black hover:bg-red-700">
+      Refusé
+    </Button>
+  </div>
+</Modal>
+
         </>
       ),
     },
