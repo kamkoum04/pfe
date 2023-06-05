@@ -39,11 +39,10 @@ const WelcomePage = () => {
                 className="mb-6 font-black"
               >
                 
-                          Votre histoire commence avec nous.
+                Your story starts with us.
               </Typography>
               <Typography variant="lead" color="white" className="opacity-80">
-              Bienvenue sur notre plateforme de gestion des associations et des licences ! Avec notre interface utilisateur intuitive ,
-               vous bénéficierez d'une expérience fluide pour gérer vos associations et licences
+              Welcome to our platform for managing associations and licenses! With our intuitive user interface, you will have a seamless experience managing your associations and licenses.
               </Typography>
             </div>
           </div>
@@ -64,19 +63,18 @@ const WelcomePage = () => {
                 className="mb-3 font-bold"
                 color="blue-gray"
               >
-                Rejoignez notre communauté !
-              </Typography>
+               Join our community!              </Typography>
               <Typography className="mb-8 font-normal text-blue-gray-500">
-              Découvrez les avantages de travailler avec nous et faites partie d'une communauté engagée
+              Discover the benefits of working with us and become part of a committed community. Our kit is designed to help you get started faster. Take advantage of showcasing your association.
                 <br />
-                Notre kit est conçu pour vous aider à démarrer plus rapidement. Profitez  pour mettre en avant votre association
+               
               </Typography>
               <Button
                 type="primary" className='text-black bg-blue-300'
                 variant="outlined"
                 onClick={handleOpenModal}
               >
-                Inscrire votre Association
+                Register Your Association
               </Button>
             </div>
             <div className="mx-auto mt-24 flex w-full justify-center px-4 md:w-4/12">
@@ -97,7 +95,7 @@ const WelcomePage = () => {
                     
                   </Typography>
                   <Typography className="font-normal text-blue-gray-500">
-                  Gérer, simplifier, associations, licences, productivité, convivialité, optimiser.
+                  Manage, simplify, associations, licenses, productivity, user-friendly, optimize.
                   </Typography>
                 </CardBody>
               </Card>
@@ -113,7 +111,7 @@ const WelcomePage = () => {
                 className="mb-3 font-bold"
                 color="blue-gray"
               >
-                Gérer vos associations
+                Manage Your Associations
               </Typography> 
               <Association/>
          
@@ -121,7 +119,20 @@ const WelcomePage = () => {
       </section>
      
       
-      <Modal size="lg" visible={openModal} onCancel={handleCloseModal}>
+      <Modal 
+      size="lg" 
+      visible={openModal} 
+      onCancel={() => handleCloseModal()}
+      
+      footer={[
+        <Button key="finish" type="primary" className='text-black' onClick={() => {
+          handleCloseModal();
+         
+        }}>
+          Finish
+        </Button>,
+      ]}
+      >
         <InscrireAssociation />
       </Modal>
     </>

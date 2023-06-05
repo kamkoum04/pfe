@@ -44,12 +44,12 @@ export default function InscrireAssociation() {
   return (
     <Card color="transparent" shadow={false}>
       <Typography variant="h4" color="blue-gray">
-        Inscrire une association
+      Register Your Association
       </Typography>
       
       <form className="mt-8 mb-2 w-80 max-w-screen-lg sm:w-96" onSubmit={handleSubmit}>
         <div className="mb-4 flex flex-col gap-6">
-          <h1>Nom</h1>
+          <h1>Name</h1>
           <Input
             size="lg"
             value={name}
@@ -61,13 +61,13 @@ export default function InscrireAssociation() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          <h1>Adresse</h1>
+          <h1>Adress</h1>
           <Input
             size="lg"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
           />
-          <h1>Numéro de téléphone</h1>
+          <h1>Phone number</h1>
           <Input
             size="lg"
             value={phoneNumber}
@@ -75,7 +75,7 @@ export default function InscrireAssociation() {
           />
         </div>
         <Button type="submit" className="mt-6 bg-gray-300" fullWidth>
-          S'inscrire
+        Register
         </Button>
       </form>
     </Card>

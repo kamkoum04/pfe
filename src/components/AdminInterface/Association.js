@@ -1,22 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Modal, Table, Typography, message } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Table, Typography, message, Tooltip, Modal } from 'antd';
+import DeleteOutlined from '@ant-design/icons/DeleteOutlined';
 
 const Association1 = () => {
   const [associations, setAssociations] = useState([]);
-  const [isDeleted, setIsDeleted] = useState(false);
-  const [editedAssociation, setEditedAssociation] = useState(null);
+  const [isAssociationDeleted, setIsAssociationDeleted] = useState(false);
+  const [associationToDelete, setAssociationToDelete] = useState(null);
+  const [isDeleteConfirmationVisible, setIsDeleteConfirmationVisible] = useState(false);
 
-  const [isEditing, setIsEditing] = useState(false);
   useEffect(() => {
-    const fetchAssociations = async () => {
-      const response = await fetch('http://localhost:8282/association');
-      const data = await response.json();
-      setAssociations(data.associations);
-    };
-
     fetchAssociations();
-  }, [isDeleted]);
+  }, [isAssociationDeleted]);
 
   const columns = [
     {
@@ -50,94 +44,83 @@ const Association1 = () => {
       key: 'actions',
       render: (text, record) => (
         <>
-          <EditOutlined onClick={()=>{
-            onEditingAssociation(record);
-          }}
-          style={{ color: 'blue' }}/>
-          <DeleteOutlined
-            onClick={() => onDeleteAssociation(record.id)}
-            style={{ color: 'red', marginLeft: 12 }}
-          />
+          <Tooltip title="Delete Association">
+            <DeleteOutlined onClick={() => showDeleteConfirmation(record)} style={{ color: 'red', marginLeft: 12 }} />
+          </Tooltip>
         </>
       ),
     },
   ];
+
+  const fetchAssociations = async () => {
+    const response = await fetch('http://localhost:8282/association');
+    const data = await response.json();
+    setAssociations(data.associations);
+  };
 
   const onDeleteAssociation = async (associationId) => {
     const response = await fetch(`http://localhost:8282/association/${associationId}`, {
       method: 'DELETE',
     });
 
-    if (response.status === 200) {
-      setIsDeleted(true);
-      message.success('Association deleted successfully');
-    } else {
-      message.error('Failed to delete association');
+    const responseData = await response.json();
+    console.log('Response code:', responseData.code);
+
+    switch (responseData.code) {
+      case '200':
+        message.success('Association deleted successfully');
+        fetchAssociations();
+        break;
+      case '500':
+        switch (responseData.message) {
+          case 'delete Association failed':
+            message.error('An error occurred while deleting association');
+            break;
+          default:
+            message.error('Association has a license');
+            break;
+        }
+        break;
+      default:
+        console.error(responseData);
+        message.error('An error occurred');
+        break;
     }
   };
 
-  const onEditingAssociation = (record) => {
-    setIsEditing(true);
-    setEditedAssociation({ ...record, associationId: record.id, userId: record.userId, email: record.email });
+  const showDeleteConfirmation = (association) => {
+    setAssociationToDelete(association);
+    setIsDeleteConfirmationVisible(true);
   };
-  
-  const fetchAssociations = async () => {
-    const response = await fetch('http://localhost:8282/association');
-    const data = await response.json();
-    setAssociations(data.associations);
-  };
-  
-  const onUpdateAssociation = async () => {
-    try {
-      const response = await fetch(`http://localhost:8282/association`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...editedAssociation,
-          associationId: editedAssociation.associationId,
-          userId: 2,
-          mail: editedAssociation.email,
-        }),
-      });
-  
-      if (response.status === 200) {
-        message.success('Association updated successfully');
-        setIsEditing(false);
-        setEditedAssociation(null);
-        fetchAssociations();
-      } else {
-        message.error('Failed to update association');
-      }
-    } catch (error) {
-      console.log(error);
-      message.error('Failed to update association');
+
+  const confirmDeleteAssociation = async () => {
+    if (associationToDelete) {
+      setIsDeleteConfirmationVisible(false);
+      await onDeleteAssociation(associationToDelete.id);
     }
   };
-  
+
+  const cancelDeleteAssociation = () => {
+    setAssociationToDelete(null);
+    setIsDeleteConfirmationVisible(false);
+  };
 
   return (
     <div>
       <Typography.Title level={4}>Associations</Typography.Title>
       <Table dataSource={associations} columns={columns} />
       <Modal
-  title="Edit Association"
-  visible={isEditing}
-  okText="Save"
-  onCancel={() => {
-    setIsEditing(false);
-    setEditedAssociation(null);
-  }}
-  onOk={onUpdateAssociation}
->
-  <Input value={editedAssociation?.name} onChange={(e) => setEditedAssociation({ ...editedAssociation, name: e.target.value })} />
-  <Input value={editedAssociation?.phoneNumber} onChange={(e) => setEditedAssociation({ ...editedAssociation, phoneNumber: e.target.value })} />
-  <Input value={editedAssociation?.adress} onChange={(e) => setEditedAssociation({ ...editedAssociation, adress: e.target.value })} />
-  <Input value={editedAssociation?.email} onChange={(e) => setEditedAssociation({ ...editedAssociation, email: e.target.value })} />
-</Modal>
+        title="Confirm Delete"
+        visible={isDeleteConfirmationVisible}
+        onCancel={cancelDeleteAssociation}
+        onOk={confirmDeleteAssociation}
+        okText="Confirm"
+        okButtonProps={{ danger: true }}
+      >
+        <p>Are you sure you want to delete this association?</p>
+      </Modal>
     </div>
   );
-}
+};
 
-export default Association1
+export default Association1;

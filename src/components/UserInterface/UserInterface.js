@@ -13,7 +13,7 @@ import { Navbar } from "../Navbar/Navbar";
 import InscrireAssociation from "./InscrireAssociation";
 import { Modal } from "antd";
 import Association from './Association'
-import Footer from "./Footer";
+import Footer from "../Footer/Footer.js"
 import Topbar from "./Topbar";
 import Content1 from "./Content";
 

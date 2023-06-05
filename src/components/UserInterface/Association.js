@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Input, Modal, Table,  message, Button , Tooltip  } from 'antd';
+import { Input, Modal, Table, message, Button, Tooltip } from 'antd';
 import { EditOutlined, DeleteOutlined, FileTextOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import Addlicense from './Addlicense';
@@ -14,6 +14,8 @@ const Associations = ({ userId = 2 }) => {
   const [associationId, setAssociationId] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isLicenseModalVisible, setIsLicenseModalVisible] = useState(false);
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Nouvelle state pour la visibilité du modal de suppression
+  const [associationToDelete, setAssociationToDelete] = useState(null); // Nouvelle state pour stocker l'association à supprimer
 
   const fetchAssociations = async () => {
     try {
@@ -29,9 +31,14 @@ const Associations = ({ userId = 2 }) => {
     }
   };
 
-  const onDeleteAssociation = async (associationId) => {
+  const onDeleteAssociation = (association) => {
+    setAssociationToDelete(association);
+    setIsDeleteModalVisible(true);
+  };
+
+  const confirmDeleteAssociation = async () => {
     try {
-      const response = await axios.delete(`http://localhost:8282/association/${associationId}`);
+      const response = await axios.delete(`http://localhost:8282/association/${associationToDelete.id}`);
       if (response.status === 200) {
         setIsDeleted(true);
         message.success('Association deleted successfully');
@@ -42,6 +49,11 @@ const Associations = ({ userId = 2 }) => {
       console.error('Failed to delete association:', error);
       message.error('Failed to delete association');
     }
+    setIsDeleteModalVisible(false);
+  };
+
+  const cancelDeleteAssociation = () => {
+    setIsDeleteModalVisible(false);
   };
 
   const onEditingAssociation = (record) => {
@@ -49,27 +61,39 @@ const Associations = ({ userId = 2 }) => {
     setEditedAssociation({ ...record, associationId: record.id, userId: record.userId, email: record.email });
   };
 
-  const onUpdateAssociation = async () => {
-    try {
-      const response = await axios.put(`http://localhost:8282/association`, {
+const onUpdateAssociation = async () => {
+  try {
+    const response = await fetch(`http://localhost:8282/association`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
         ...editedAssociation,
         associationId: editedAssociation.associationId,
-        userId: 14,
+        userId: 2,
         mail: editedAssociation.email,
-      });
-      if (response.status === 200) {
-        message.success('Association updated successfully');
-        setIsEditing(false);
-        setEditedAssociation(null);
-        fetchAssociations();
-      } else {
-        message.error('Failed to update association');
-      }
-    } catch (error) {
-      console.error('Failed to update association:', error);
+      }),
+    });
+
+    if (response.status === 200) {
+      message.success('Association updated successfully');
+      setIsEditing(false);
+      setEditedAssociation(null);
+      fetchAssociations();
+    } else if (response.status === 201) {
+      const errorData = await response.json();
+      message.error('Failed to update association');
+      setErrorMessage(errorData.message);
+    } else {
       message.error('Failed to update association');
     }
-  };
+  } catch (error) {
+    console.log(error);
+    message.error('Failed to update association');
+  }
+};
+
   const handleLicenseModal = () => {
     setIsLicenseModalVisible(true);
   };
@@ -124,8 +148,13 @@ const Associations = ({ userId = 2 }) => {
           <Tooltip title="View License">
             <FileTextOutlined style={{ color: 'green', marginLeft: 12 }} onClick={handleLicenseModal} />
           </Tooltip>
-          <Button type="primary" className="text-black" style={{ marginLeft: 12 }} onClick={() => onDemandLicence(record.id)}>
-            Demander Licence
+          <Button
+            type="primary"
+            className="text-black"
+            style={{ marginLeft: 12 }}
+            onClick={() => onDemandLicence(record.id)}
+          >
+           Request License
           </Button>
         </>
       ),
@@ -139,34 +168,68 @@ const Associations = ({ userId = 2 }) => {
         title="Edit Association"
         visible={isEditing}
         okText="Save"
-        onCancel={() => {
-          setIsEditing(false);
-          setEditedAssociation(null);
-        }}
-        onOk={onUpdateAssociation}
+        onCancel={() => setIsEditing(false)}
+        footer={[
+          <Button
+            key="finish"
+            type="primary"
+            className="text-black"
+            onClick={() => {
+              onUpdateAssociation();
+              setIsEditing(false);
+              setEditedAssociation(null);
+            }}
+          >
+            Finish
+          </Button>,
+        ]}
       >
-        <Input value={editedAssociation?.name} onChange={(e) => setEditedAssociation({ ...editedAssociation, name: e.target.value })} />
+        <Input
+          value={editedAssociation?.name}
+          onChange={(e) => setEditedAssociation({ ...editedAssociation, name: e.target.value })}
+        />
         <Input
           value={editedAssociation?.phoneNumber}
           onChange={(e) => setEditedAssociation({ ...editedAssociation, phoneNumber: e.target.value })}
         />
-        <Input value={editedAssociation?.adress} onChange={(e) => setEditedAssociation({ ...editedAssociation, address: e.target.value })} />
-        <Input value={editedAssociation?.email} onChange={(e) => setEditedAssociation({ ...editedAssociation, email: e.target.value })} />
+        <Input
+          value={editedAssociation?.adress}
+          onChange={(e) => setEditedAssociation({ ...editedAssociation, address: e.target.value })}
+        />
+        <Input
+          value={editedAssociation?.email}
+          onChange={(e) => setEditedAssociation({ ...editedAssociation, email: e.target.value })}
+        />
       </Modal>
       <Modal
-         title="Licence Details"
-         visible={isLicenseModalVisible}
-         onCancel={() => setIsLicenseModalVisible(false)}
-          // ... autres propriétés du modal
-           >
-           {/* Contenu du modal de consultation de la licence */}
-       </Modal>
+        title="Licence Details"
+        visible={isLicenseModalVisible}
+        onCancel={() => setIsLicenseModalVisible(false)}
+        footer={[
+          <Button
+            key="finish"
+            type="primary"
+            className="text-black"
+            onClick={() => {
+              setIsLicenseModalVisible(false);
+            }}
+          >
+            Finish
+          </Button>,
+        ]}
+      >
+        {/* Contenu du modal de consultation de la licence */}
+      </Modal>
       <Modal
         title="Demande de Licence"
         visible={isModalVisible && currentStep === 0}
-        onCancel={() => setIsModalVisible(false)}
         footer={[
-          <Button key="next" type="primary" className='text-black' onClick={() => setCurrentStep(1)}>
+          <Button
+            key="next"
+            type="primary"
+            className="text-black"
+            onClick={() => setCurrentStep(1)}
+          >
             Next
           </Button>,
         ]}
@@ -178,18 +241,37 @@ const Associations = ({ userId = 2 }) => {
       <Modal
         title="Export Documents"
         visible={isModalVisible && currentStep === 1}
-        onCancel={() => setIsModalVisible(false)}
         footer={[
-          <Button key="finish" type="primary" className='text-black' onClick={() => {
-            setIsModalVisible(false);
-            clearLicenseId(); // Appel de la fonction pour vider l'élément du stockage local
-          }}>
+          <Button
+            key="finish"
+            type="primary"
+            className="text-black"
+            onClick={() => {
+              setIsModalVisible(false);
+              clearLicenseId(); // Appel de la fonction pour vider l'élément du stockage local
+            }}
+          >
             Finish
           </Button>,
         ]}
         width={600}
       >
-        <ExportDocuments licenseId={associationId}  />
+        <ExportDocuments licenseId={associationId} />
+      </Modal>
+      <Modal
+        title="Confirm Association Deletion"
+        visible={isDeleteModalVisible}
+        onCancel={cancelDeleteAssociation}
+        footer={[
+          <Button key="cancel" onClick={cancelDeleteAssociation}>
+            Cancel
+          </Button>,
+          <Button key="delete" type="danger" onClick={confirmDeleteAssociation} className='hover:bg-red-700'>
+            Delete
+          </Button>,
+        ]}
+      >
+        <p>Are you sure you want to delete the association {associationToDelete?.name}?</p>
       </Modal>
     </div>
   );

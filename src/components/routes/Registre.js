@@ -93,7 +93,7 @@ const Registre = () => {
                   name="username"
                   placeholder="Username"
                   value={formData.username}
-                  onChange={handleChange}
+                  onChange={handleChange} required
                 />
               </div>
             </div>
@@ -106,7 +106,7 @@ const Registre = () => {
                   name="firstName"
                   placeholder="First name"
                   value={formData.firstName}
-                  onChange={handleChange}
+                  onChange={handleChange} required
                 />
               </div>
               <div className="relative">
@@ -117,7 +117,7 @@ const Registre = () => {
                   name="lastName"
                   placeholder="Last name"
                   value={formData.lastName}
-                  onChange={handleChange}
+                  onChange={handleChange}  required
                 />
               </div>
             </div>
@@ -130,7 +130,7 @@ const Registre = () => {
                   name="email"
                   placeholder="Email"
                   value={formData.email}
-                  onChange={handleChange}
+                  onChange={handleChange} required
                 />
               </div>
             </div>
@@ -143,7 +143,7 @@ const Registre = () => {
                   name="password"
                   placeholder="Password"
                   value={formData.password}
-                  onChange={handleChange}
+                  onChange={handleChange} required
                 />
               </div>
             </div>
@@ -156,7 +156,7 @@ const Registre = () => {
                   name="phoneNumber"
                   placeholder="Phone number"
                   value={formData.phoneNumber}
-                  onChange={handleChange}
+                  onChange={handleChange} required
                 />
               </div>
             </div>
@@ -167,7 +167,7 @@ const Registre = () => {
                   className="rounded-lg border-transparent flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-gray-700 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-purple-600 focus:border-transparent"
                   name="townId"
                   value={formData.townId}
-                  onChange={handleChange}
+                  onChange={handleChange} required
                 >
                   <option value="">Select Town</option>
                   <option value="1">Tunis</option>

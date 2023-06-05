@@ -1,188 +1,272 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Button, Form, Input, Modal, message } from 'antd';
-import axios from 'axios';
+import { message, Modal, Input } from 'antd';
 
 const ProfilePage = () => {
-  const [userData, setUserData] = useState(null);
-  const [form] = Form.useForm();
-  const [isPasswordModalVisible, setIsPasswordModalVisible] = useState(false);
-  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [username, setUsername] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [oldPassword, setOldPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+
+
 
   useEffect(() => {
-    axios.get('http://localhost:8282/user/filter')
-      .then(response => response.data)
+    fetch('http://localhost:8282/user/filter')
+      .then(response => response.json())
       .then(data => {
-        const user = data.users.find(user => user.username === 'mohsen');
-        setUserData(user);
-        form.setFieldsValue(user);
+        const user = data.users.find(user => user.username === 'hamza');
+        if (user) {
+          setUserData(user);
+        }
       });
-  }, [form]);
-  const handleSave = () => {
-    form.validateFields()
-      .then(values => {
-        const payload = {
-          firstname: values.firstname,
-          lastname: values.lastname,
-          mail: values.email,
-          phoneNumber: values.phoneNumber,
-          pwd: values.pwd,
-          townId: 0, // Update with the appropriate value
-          userId: userData.userId, // Assuming userId is available in userData
-          userRoleDtos: [
-            {
-              roleId: 0 // Update with the appropriate value
-            }
-          ],
-          username: values.username
-        };
-  
-        axios.put('http://localhost:8282/user', payload)
-          .then(response => {
-            if (response.status === 200) {
-              setUpdateSuccess(true);
-              message.success('Profile updated successfully');
-            } else {
-              message.error('Failed to update profile');
-            }
-          })
-          .catch(error => {
-            message.error('An error occurred while updating profile');
-            console.error(error);
-          });
-      });
+  }, []);
+
+  const setUserData = (user) => {
+    setUsername(user.username || '');
+    setFirstName(user.firstname || '');
+    setLastName(user.lastname || '');
+    setEmail(user.email || '');
+    setPhoneNumber(user.phoneNumber || '');
   };
-  const handlePasswordChange = values => {
-    fetch(`http://localhost:8282/user/updatePassword/${userData.id}`, {
+  
+  const handleSubmit = (event) => {
+    event.preventDefault();
+  
+    const data = {
+      firstname: firstName,
+      lastname: lastName,
+      mail: email,
+      phoneNumber: phoneNumber,
+      pwd: '',
+      townId: 0,
+      userId: 2,
+      userRoleDtos: [
+        {
+          roleId: 2,
+        },
+      ],
+      username: username,
+    };
+  
+    console.log('Request Payload:', data);
+  
+    fetch('http://localhost:8282/user', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        id: userData.id,
-        newPassword: values.newPassword,
-        oldPassword: values.oldPassword,
-      }),
-    }).then(response => {
-      if (response.status === 200) {
-        setUpdateSuccess(true);
-        message.success('Password changed successfully');
-        console.log(oldPassword, newPassword, userId);
-      } else {
-        message.error('Failed to change password');
-        console.log(oldPassword, newPassword, userId);
-      }
+      body: JSON.stringify(data),
     })
-    .catch(error => {
-      message.error('An error occurred while changing password');
-      console.error(error);
-      console.log(oldPassword, newPassword, userId);
-    });
-  };
-  
-  const handleChangePassword = () => {
-    form.validateFields(['oldPassword', 'newPassword'])
-      .then(values => {
-        const oldPassword = values.oldPassword;
-        const newPassword = values.newPassword;
-        const userId = userData.userId;
-  
-        const payload = {
-          id: userId,
-          oldPassword,
-          newPassword
-        };
-  
-        axios
-          .put(`http://localhost:8282/user/updatePassword/${userId}`, payload)
-          .then(response => {
-            if (response.status === 200) {
-              setUpdateSuccess(true);
-              message.success('Password changed successfully');
-              console.log(oldPassword, newPassword, userId);
-            } else {
-              message.error('Failed to change password');
-              console.log(oldPassword, newPassword, userId);
-            }
-          })
-          .catch(error => {
-            message.error('An error occurred while changing password');
-            console.error(error);
-            console.log(oldPassword, newPassword, userId);
-          });
+      .then((response) => {
+        if (response.ok) {
+          message.success('Modifications saved successfully');
+        } else {
+          message.error('Failed to save modifications');
+        }
+        return response.json();
+      })
+      .then((responseData) => {
+        console.log('Response Data:', responseData);
+      })
+      .catch((error) => {
+        console.error(error);
+        message.error('An error occurred');
       });
   };
+  const handlePasswordModalOpen = () => {
+    setShowPasswordModal(true);
+  };
+  const handlePasswordModalClose = () => {
+    setShowPasswordModal(false);
+  };
+  const handlePasswordUpdate = () => {
+    const data = {
+      id: 2,
+      newPassword: newPassword,
+      oldPassword: oldPassword,
+    };
   
+    console.log('Request Payload:', data);
   
+    fetch('http://localhost:8282/user/updatePassword/2', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          return response.json();
+        } else {
+          throw new Error('Failed to update password');
+        }
+      })
+      .then((responseData) => {
+        console.log('Response Data:', responseData);
+        message.success(responseData.message); // Display the success message from the response data
+        // Clear password form fields
+        setOldPassword('');
+        setNewPassword('');
+      })
+      .catch((error) => {
+        console.error(error);
+        message.error(
+          'An error occurred',
+          () => {}, // Empty callback to remove the default close button
+          { style: { background: 'red' } } // Set the background color of the error message to red
+        );
+      });
+  };
 
- 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
 
   return (
-    <div className="w-400 mx-auto my-20 bg-slate-100">
-      {userData ? (
-        <Card className="w-96 m-auto mt-5 mb-5">
-          <h4>User Info</h4>
-          <Form form={form}>
-            <Form.Item name="username" label="Username" className="mb-4">
-              <Input />
-            </Form.Item>
-            <Form.Item name="email" label="Email" className="mb-4">
-              <Input />
-            </Form.Item>
-            <Form.Item name="firstname" label="First Name" className="mb-4">
-              <Input />
-            </Form.Item>
-            <Form.Item name="lastname" label="Last Name" className="mb-4">
-              <Input />
-            </Form.Item>
-            <Form.Item name="phoneNumber" label="Phone Number" className="mb-4">
-              <Input />
-            </Form.Item>
-            <Form.Item name="pwd" label="Password" className="mb-4">
-              <Input.Password />
-            </Form.Item>
-          </Form>
-
-          <div className="mb-4">
-            <Button type="primary" className="bg-gray-300 text-blue-800" onClick={handleSave}>
-              Save
-            </Button>
+    <section className="py-3">
+      <div className="container px-4 mx-auto">
+        <div className="p-8 bg-gray-500 rounded-xl">
+          <div className="flex flex-wrap items-center justify-between -mx-4 mb-8 pb-6 border-b border-gray-400 border-opacity-20">
+            <div className="w-full sm:w-auto px-4 mb-6 sm:mb-0">
+              <h4 className="text-2xl font-bold tracking-wide text-white mb-1">Personal info</h4>
+            </div>
+            <div className="w-full sm:w-auto px-4">
+              <div>
+                <button
+                  className="inline-block py-2 px-4 text-xs text-center font-semibold leading-normal text-blue-50 bg-blue-500 hover:bg-blue-600 rounded-lg transition duration-200"
+                  onClick={handleSubmit}
+                >
+                  Save
+                </button>
+                <button
+                  className="inline-block py-2 px-4 ml-2 text-xs text-center font-semibold leading-normal text-blue-50 bg-green-500 hover:bg-green-600 rounded-lg transition duration-200"
+                  onClick={handlePasswordModalOpen}
+                >
+                  Change Password
+                </button>
+              </div>
+            </div>
           </div>
-
-          <div>
-            <Button
-              type="primary"
-              className="bg-gray-300 text-blue-800"
-              onClick={() => setIsPasswordModalVisible(true)}
-            >
-              Change Password
-            </Button>
+          <form>
+          <div className="flex flex-wrap items-center -mx-4 pb-8 mb-8 border-b border-gray-400 border-opacity-20">
+          <div className="w-full sm:w-1/3 px-4 mb-4 sm:mb-0">
+            <span className="text-sm font-medium text-gray-100">Username</span>
           </div>
+          <div className="w-full sm:w-2/3 px-4">
+            <div className="max-w-xl">
+              <input
+                className="block py-4 px-3 w-full text-sm text-gray-50 placeholder-gray-50 font-medium outline-none bg-transparent border border-gray-400 hover:border-white focus:border-green-500 rounded-lg"
+                id="formInput1"
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center -mx-4 pb-8 mb-8 border-b border-gray-400 border-opacity-20">
+          <div className="w-full sm:w-1/3 px-4 mb-4 sm:mb-0">
+            <span className="text-sm font-medium text-gray-100">Name</span>
+          </div>
+          <div className="w-full sm:w-2/3 px-4">
+            <div className="max-w-xl">
+              <div className="flex flex-wrap items-center -mx-3">
+                <div className="w-full sm:w-1/2 px-3 mb-3 sm:mb-0">
+                  <input
+                    className="block py-4 px-3 w-full text-sm text-gray-50 placeholder-gray-50 font-medium outline-none bg-transparent border border-gray-400 hover:border-white focus:border-green-500 rounded-lg"
+                    id="formInput2"
+                    type="text"
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                  />
+                </div>
+                <div className="w-full sm:w-1/2 px-3">
+                  <input
+                    className="block py-4 px-3 w-full text-sm text-gray-50 placeholder-gray-50 font-medium outline-none bg-transparent border border-gray-400 hover:border-white focus:border-green-500 rounded-lg"
+                    id="formInput3"
+                    type="text"
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap items-center -mx-4 pb-8 mb-8 border-b border-gray-400 border-opacity-20">
+          <div className="w-full sm:w-1/3 px-4 mb-4 sm:mb-0">
+            <span className="text-sm font-medium text-gray-100">Email address</span>
+          </div>
+          <div className="w-full sm:w-2/3 px-4">
+            <div className="max-w-xl">
+              <input
+                className="block py-4 px-3 w-full text-sm text-gray-50 placeholder-gray-50 font-medium outline-none bg-transparent border border-gray-400 hover:border-white focus:border-green-500 rounded-lg"
+                id="formInput4"
+                type="text"
+                placeholder="Email Address"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
 
-          <Modal
-            title="Change Password"
-            visible={isPasswordModalVisible}
-            onCancel={() => setIsPasswordModalVisible(false)}
-            footer={[
-              <Button key="cancel" onClick={() => setIsPasswordModalVisible(false)}>
-                Cancel
-              </Button>,
-              <Button key="submit" type="primary" onClick={handleChangePassword}>
-                Change Password
-              </Button>,
-            ]}
-          >
-            <Form>
-              <Form.Item name="oldPassword" label="Old Password" className="mb-4">
-                <Input.Password />
-              </Form.Item>
-              <Form.Item name="newPassword" label="New Password" className="mb-4">
-                <Input.Password />
-              </Form.Item>
-            </Form>
-          </Modal>
-        </Card>
-      ) : null}
-    </div>
+        <div className="flex flex-wrap items-center -mx-4 pb-8 mb-8 border-b border-gray-400 border-opacity-20">
+          <div className="w-full sm:w-1/3 px-4 mb-4 sm:mb-0">
+            <span className="text-sm font-medium text-gray-100">Phone Number</span>
+          </div>
+          <div className="w-full sm:w-2/3 px-4">
+            <div className="max-w-xl">
+              <input
+                className="block py-4 px-3 w-full text-sm text-gray-50 placeholder-gray-50 font-medium outline-none bg-transparent border border-gray-400 hover:border-white focus:border-green-500 rounded-lg"
+                id="formInput5"
+                type="text"
+                placeholder="Phone Number"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+            </div>
+          </div>
+        </div>
+          </form>
+        </div>
+      </div>
+      <Modal
+        title="Change Password"
+        visible={showPasswordModal}
+        onOk={handlePasswordUpdate}
+        onCancel={handlePasswordModalClose}
+      >
+        <Input.Password
+          placeholder="Old Password"
+          value={oldPassword}
+          onChange={(e) => setOldPassword(e.target.value)}
+          style={{ marginBottom: '10px' }}
+          required
+        />
+        <Input.Password
+          placeholder="New Password"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+          required
+        />
+      </Modal>
+    </section>
   );
 };
 

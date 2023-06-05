@@ -134,6 +134,15 @@ const License1 = () => {
   title="License Details"
   visible={isModalVisible}
   onCancel={() => setIsModalVisible(false)}
+  footer={[
+    <Button key="finish" type="primary" className='text-black' onClick={() => {
+      
+      setIsModalVisible(false)
+     
+    }}>
+      Finish
+    </Button>,
+  ]}
 >
   
   <div class="mt-6 border-t border-gray-100">
@@ -183,10 +192,10 @@ const License1 = () => {
     <Input placeholder="Comment" value={comment} onChange={(e) => setComment(e.target.value)} />
   </div>
   <div class="flex justify-end mt-6">
-    <Button  onClick={handleAccept} class="mr-2 text-black hover:bg-lime-600" >
+    <Button  onClick={handleAccept} className="mr-2 text-black hover:bg-lime-600" >
       Accept
     </Button>
-    <Button  onClick={handleReject} class="mr-2 text-black hover:bg-red-700">
+    <Button  onClick={handleReject} className="mr-2 text-black hover:bg-red-700">
       Refusé
     </Button>
   </div>

@@ -23,7 +23,7 @@ const AddLicense = ({ associationId }) => {
       associationId: associationId,
       menbresLicenceRequest: members,
       requestTypeId: values.requestTypeId,
-      statusId: values.statusId,
+      statusId: 1,
     };
 
     try {
@@ -35,6 +35,7 @@ const AddLicense = ({ associationId }) => {
         setMembers([]); // Clear members array
         const licenseId = response.data.num; // Assurez-vous d'utiliser la clé correcte pour obtenir l'ID de licence de la réponse de l'API
         localStorage.setItem('licenseId', licenseId);
+        console.log(members)
       }else if (response.data.code == 201) {
         console.log(response.data.code);
         console.log(associationId, members, values.requestTypeId, values.statusId);
@@ -66,7 +67,8 @@ const AddLicense = ({ associationId }) => {
 
   const updateMemberField = (index, field, value) => {
     const newMembers = [...members];
-    newMembers[index][field] = value;
+    const updatedMember = { ...newMembers[index], [field]: value };
+    newMembers[index] = updatedMember;
     setMembers(newMembers);
   };
 
@@ -80,13 +82,7 @@ const AddLicense = ({ associationId }) => {
         </Select>
       </Form.Item>
 
-      <Form.Item label="Status" name="statusId">
-        <Select placeholder="Select Status">
-          <Option value="1"> </Option>
-          <Option value="2" disabled>Accepted</Option>
-          <Option value="3" disabled>Refused</Option>
-        </Select>
-      </Form.Item>
+     
 
       <h3>License Members Request:</h3>
       {members.map((member, index) => (
@@ -136,13 +132,13 @@ const AddLicense = ({ associationId }) => {
             />
           </Form.Item>
           <Form.Item name={['members', index, 'responsibilityId']}>
-            <Select
-              value={member.responsibilityId}
-              onChange={(value) => updateMemberField(index, 'responsibilityId', value)}
-              style={{ width: '100%' }}
-              placeholder="Select Responsibility"
-              required
-            >
+  <Select
+    value={member.responsibilityId || undefined} // Set the value to undefined if it is falsy
+    onChange={(value) => updateMemberField(index, 'responsibilityId', value)}
+    style={{ width: '100%' }}
+    placeholder="Select Responsibility"
+    required
+  >
               <Option value="1">President</Option>
               <Option value="2">Secretary</Option>
               <Option value="3">Treasurer</Option>
