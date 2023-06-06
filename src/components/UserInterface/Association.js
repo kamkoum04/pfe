@@ -4,6 +4,7 @@ import { EditOutlined, DeleteOutlined, FileTextOutlined } from '@ant-design/icon
 import axios from 'axios';
 import Addlicense from './Addlicense';
 import ExportDocuments from './ExportDocuments';
+import LicensePage from './LicensePage';
 
 const Associations = ({ userId = 2 }) => {
   const [associations, setAssociations] = useState([]);
@@ -21,7 +22,7 @@ const Associations = ({ userId = 2 }) => {
     try {
       const response = await axios.get(`http://localhost:8282/association`, {
         params: {
-          userId: userId
+          userId: 21
         }
       });
       const data = response.data;
@@ -156,6 +157,7 @@ const onUpdateAssociation = async () => {
           >
            Request License
           </Button>
+          
         </>
       ),
     },
@@ -218,7 +220,7 @@ const onUpdateAssociation = async () => {
           </Button>,
         ]}
       >
-        {/* Contenu du modal de consultation de la licence */}
+        <LicensePage/> 
       </Modal>
       <Modal
         title="Demande de Licence"

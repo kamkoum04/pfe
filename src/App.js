@@ -30,7 +30,7 @@ function App() {
   return (
     <BrowserRouter>
       <div className="App">
-            <Routes>
+        <Routes>
           <Route path='/' element={<Home/>}/>
           <Route path='/about' element={<About/>}/>
           <Route path='/service' element={<Service/>}/>
@@ -38,7 +38,7 @@ function App() {
           <Route path ='/login' element={<Login/>}/>
           <Route path ='/registre' element={<Registre/>}/>
          
-
+            {/* we want to protect this route   */ }
        
           <Route path='/user' element={<UserInterface/>} >
           <Route path='/user' element={<WelcomePage/>} />
@@ -46,22 +46,15 @@ function App() {
           <Route path='/user/association' element={<Association/>} />
           <Route path='/user/profile' element={<Profile/>} />
           <Route path='/user/license' element={<Licence/>} />
-         
+         </Route>
 
-          
-
-           </Route>
 
           <Route path='/admin' element={<Admininterface/>} >
-          <Route path='/admin' element={<Dashbord/>} />
-          
+          <Route path='/admin' element={<Dashbord/>} />     
           <Route path='/admin/association' element={<Association1/>} />
           <Route path='/admin/profile' element={<User/>} />
           <Route path='/admin/license' element={<Licence1/>} />
-
-          
-
-           </Route>
+          </Route>
 
  </Routes>
       

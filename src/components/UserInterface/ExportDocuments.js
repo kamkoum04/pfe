@@ -1,17 +1,16 @@
 import React, { useState } from 'react';
-import { Button, FormControl, InputLabel, MenuItem, Select } from '@material-ui/core';
-import { CloudUpload } from '@material-ui/icons';
+import { Button, Select, Upload } from 'antd';
+import { CloudUploadOutlined } from '@ant-design/icons';
 import axios from 'axios';
+
+const { Option } = Select;
 
 const ExportDocuments = () => {
   const [selectedMemberType, setSelectedMemberType] = useState('');
-  
 
-  const handleMemberTypeChange = (event) => {
-    setSelectedMemberType(event.target.value);
+  const handleMemberTypeChange = (value) => {
+    setSelectedMemberType(value);
   };
-
-
 
   const handleMemberExport = () => {
     let typeDocId;
@@ -32,11 +31,12 @@ const ExportDocuments = () => {
     data.append('name', name);
     data.append('typeDocId', typeDocId);
 
-    axios.post('http://localhost:8282/document', data)
-      .then(response => {
+    axios
+      .post('http://localhost:8282/document', data)
+      .then((response) => {
         console.log(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
       });
   };
@@ -46,15 +46,16 @@ const ExportDocuments = () => {
     const licenseId = localStorage.getItem('licenseId');
 
     data.append('file', document.getElementById('authorizationDocumentFile').files[0]);
-    data.append('licenceId', licenseId); 
+    data.append('licenceId', licenseId);
     data.append('name', 'Autorisation');
     data.append('typeDocId', 3);
 
-    axios.post('http://localhost:8282/document', data)
-      .then(response => {
+    axios
+      .post('http://localhost:8282/document', data)
+      .then((response) => {
         console.log(response.data);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error(error);
       });
   };
@@ -62,32 +63,28 @@ const ExportDocuments = () => {
   return (
     <div className="container mx-auto p-4">
       <h2 className="text-2xl font-bold mb-4">Export de document pour membre documents</h2>
-      <FormControl variant="outlined" className="w-1/2 mb-4">
-        <InputLabel id="member-type-label">Sélectionner un type de document</InputLabel>
-        <Select
-          labelId="member-type-label"
-          id="member-type-select"
-          value={selectedMemberType}
-          onChange={handleMemberTypeChange}
-          label="Type de document"
-        >
-          <MenuItem value="">
-            <em>Choisir...</em>
-          </MenuItem>
-          <MenuItem value="CIN">CIN</MenuItem>
-          <MenuItem value="Passport">Passport</MenuItem>
-        </Select>
-      </FormControl>
+      <Select
+        className="w-1/2 mb-4"
+        placeholder="Sélectionner un type de document"
+        value={selectedMemberType}
+        onChange={handleMemberTypeChange}
+      >
+        <Option value="CIN">CIN</Option>
+        <Option value="Passport">Passport</Option>
+      </Select>
       {selectedMemberType && (
         <div className="mb-4">
           <h3 className="text-lg font-bold">Export de document pour {selectedMemberType}</h3>
-          <input type="file" id="memberDocumentFile" className="mb-2" />
+          <Upload id="memberDocumentFile" className="mb-2">
+            <Button icon={<CloudUploadOutlined />} className="text-sm">
+              Importer
+            </Button>
+          </Upload>
           <Button
-            variant="contained"
-            color="primary"
-            startIcon={<CloudUpload />}
+            type="primary"
+            icon={<CloudUploadOutlined />}
             onClick={handleMemberExport}
-            className="text-sm"
+            className="text-sm text-black"
           >
             Exporter
           </Button>
@@ -95,13 +92,16 @@ const ExportDocuments = () => {
       )}
 
       <h2 className="text-2xl font-bold mb-4">Export de document pour autorisation</h2>
-      <input type="file" id="authorizationDocumentFile" className="mb-2" />
+      <Upload id="authorizationDocumentFile" className="mb-2">
+        <Button icon={<CloudUploadOutlined />} className="text-sm">
+          Importer
+        </Button>
+      </Upload>
       <Button
-        variant="contained"
-        color="primary"
-        startIcon={<CloudUpload />}
+        type="primary"
+        icon={<CloudUploadOutlined />}
         onClick={handleAuthorizationExport}
-        className="text-sm"
+        className="text-sm text-black"
       >
         Exporter
       </Button>

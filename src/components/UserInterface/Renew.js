@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Select, message } from 'antd';
+import { Form, Input, Button, Select ,message } from 'antd';
 import styled from 'styled-components';
 import { PlusOutlined } from '@ant-design/icons';
 import axios from 'axios';
@@ -14,54 +14,43 @@ const StyledForm = styled(Form)`
   border-radius: 4px;
 `;
 
-const AddLicense = ({ associationId }) => {
+const Renew = ({ associationId }) => {
   const [form] = Form.useForm();
   const [members, setMembers] = useState([]);
-  const [statusId, setStatusId] = useState(1);
 
   const handleSubmit = async (values) => {
     const requestData = {
       associationId: associationId,
       menbresLicenceRequest: members,
       requestTypeId: values.requestTypeId,
-      statusId: statusId,
+      statusId: 1,
     };
+
     try {
-      const response = await axios.post('http://localhost:8282/license', requestData);
-    
-      console.log('Response data:', response.data);
-    
-      switch (response.data.code) {
-        case '200':
-          message.success('License added successfully');
-          form.resetFields();
-          setMembers([]);
-          const licenseId = response.data.num;
-          localStorage.setItem('licenseId', licenseId);
-          console.log(members);
-          break;
-        case '201':
-          console.log(response.data.code);
-          console.log(associationId, members, values.requestTypeId, statusId);
-          message.error('License already exists');
-          break;
-        default:
-          console.log(response.data.code);
-          console.log(associationId, members, values.requestTypeId, statusId);
-          message.error('Failed to add license');
-          break;
+      const response = await axios.put('http://localhost:8282/license', requestData);
+
+      if (response.data.code == 200) {
+        message.success('license add  successfully');
+        form.resetFields(); // Clear form fields
+        setMembers([]); // Clear members array
+        const licenseId = response.data.num; // Assurez-vous d'utiliser la clé correcte pour obtenir l'ID de licence de la réponse de l'API
+        localStorage.setItem('licenseId', licenseId);
+        console.log(members)
+      }else if (response.data.code == 201) {
+        console.log(response.data.code);
+        console.log(associationId, members, values.requestTypeId, values.statusId);
+        message.error('license exist');
+      } 
+      else {
+        console.log(response.data.code);
+        console.log(associationId, members, values.requestTypeId, values.statusId);
+        message.error('license add  failed');
       }
     } catch (error) {
-      console.log('Error:', error);
-      console.log(associationId, members, values.requestTypeId, statusId);
-      message.error('Failed to add license');
+      console.log(error);
+      console.log(associationId, members, values.requestTypeId, values.statusId);
     }
-    
   };
-  
-  
-  
-  
 
   const addMember = () => {
     setMembers([
@@ -75,25 +64,26 @@ const AddLicense = ({ associationId }) => {
       },
     ]);
   };
-
   const updateMemberField = (index, field, value) => {
     const newMembers = [...members];
-    const updatedMember = { ...newMembers[index], [field]: field === 'responsibilityId' ? Number(value) : value };
+    const updatedMember = { ...newMembers[index], [field]: value };
     newMembers[index] = updatedMember;
     setMembers(newMembers);
-
+  
     localStorage.setItem('licenseMembers', JSON.stringify(newMembers));
   };
 
   return (
-    <StyledForm form={form} onFinish={handleSubmit}>
+    <Form form={form} onFinish={handleSubmit}>
       <Form.Item label="Request Type" name="requestTypeId">
         <Select placeholder="Select Request Type">
-          <Option value="1">Request license</Option>
-          <Option value="2" disabled>Renewal of license</Option>
-          
+          <Option value="1" disabled>Demande de licence</Option>
+          <Option value="2" >Renewal of license</Option>
+         
         </Select>
       </Form.Item>
+
+     
 
       <h3>License Members Request:</h3>
       {members.map((member, index) => (
@@ -143,13 +133,13 @@ const AddLicense = ({ associationId }) => {
             />
           </Form.Item>
           <Form.Item name={['members', index, 'responsibilityId']}>
-            <Select
-              value={member.responsibilityId || undefined}
-              onChange={(value) => updateMemberField(index, 'responsibilityId', value)}
-              style={{ width: '100%' }}
-              placeholder="Select Responsibility"
-              required
-            >
+  <Select
+    value={member.responsibilityId || undefined} // Set the value to undefined if it is falsy
+    onChange={(value) => updateMemberField(index, 'responsibilityId', value)}
+    style={{ width: '100%' }}
+    placeholder="Select Responsibility"
+    required
+  >
               <Option value="1">President</Option>
               <Option value="2">Secretary</Option>
               <Option value="3">Treasurer</Option>
@@ -160,17 +150,15 @@ const AddLicense = ({ associationId }) => {
           </Form.Item>
         </div>
       ))}
-      <Button icon={<PlusOutlined />} onClick={addMember}>
-        Add Member
-      </Button>
+      <Button icon={<PlusOutlined />} onClick={addMember}>Add Member</Button>
 
       <br />
 
       <Button className="bg-blue-300" htmlType="submit">
         Submit
       </Button>
-    </StyledForm>
+    </Form>
   );
 };
 
-export default AddLicense;
+export default Renew;

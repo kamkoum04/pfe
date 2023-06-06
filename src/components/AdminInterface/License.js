@@ -183,8 +183,23 @@ const License1 = () => {
       <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
         <dt class="text-sm font-medium leading-6 text-gray-900">Documents License</dt>
         <dd class="mt-2 text-sm text-gray-900 sm:col-span-2">
-          
-        </dd>
+            {selectedLicense &&
+              selectedLicense.documents &&
+              selectedLicense.documents.map((document, index) => (
+                <div key={index}>
+                  <a href={document.url} target="_blank" rel="noopener noreferrer">
+                    {document.name}
+                  </a>
+                  <Button
+                    type="primary"
+                    shape="circle"
+                    icon={<DownloadOutlined />}
+                    className="ml-2"
+                    onClick={() => handleDownload(document.url)}
+                  />
+                </div>
+              ))}
+          </dd>
       </div>
     </dl>
   </div>
@@ -198,6 +213,7 @@ const License1 = () => {
     <Button  onClick={handleReject} className="mr-2 text-black hover:bg-red-700">
       Refusé
     </Button>
+    
   </div>
 </Modal>
 
