@@ -13,26 +13,25 @@ const ExportDocuments = () => {
   };
 
   const handleMemberExport = () => {
-    let typeDocId;
-    let name;
     const licenseId = localStorage.getItem('licenseId');
-
-    if (selectedMemberType === 'CIN') {
-      typeDocId = 1;
-      name = 'CIN';
-    } else if (selectedMemberType === 'Passport') {
-      typeDocId = 2;
-      name = 'Passport';
-    }
-
-    const data = new FormData();
-    data.append('file', document.getElementById('memberDocumentFile').files[0]);
-    data.append('licenceId', licenseId); // Use the prop value instead of hardcoding the value
-    data.append('name', name);
-    data.append('typeDocId', typeDocId);
-
+  
+    const memberTypes = {
+      CIN: { typeDocId: 1, name: 'CIN' },
+      Passport: { typeDocId: 2, name: 'Passport' },
+    };
+  
+    const formData = new FormData();
+    formData.append('file', document.getElementById('memberDocumentFile').files[0]);
+    formData.append('licenceId', licenseId);
+    formData.append('name', memberTypes[selectedMemberType].name);
+    formData.append('typeDocId', memberTypes[selectedMemberType].typeDocId);
+  
     axios
-      .post('http://localhost:8282/document', data)
+      .post('http://localhost:8282/document', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
       .then((response) => {
         console.log(response.data);
       })
@@ -40,18 +39,18 @@ const ExportDocuments = () => {
         console.error(error);
       });
   };
-
+  
   const handleAuthorizationExport = () => {
-    const data = new FormData();
     const licenseId = localStorage.getItem('licenseId');
-
-    data.append('file', document.getElementById('authorizationDocumentFile').files[0]);
-    data.append('licenceId', licenseId);
-    data.append('name', 'Autorisation');
-    data.append('typeDocId', 3);
-
+  
+    const formData = new FormData();
+    formData.append('file', document.getElementById('authorizationDocumentFile').files[0]);
+    formData.append('licenceId', licenseId);
+    formData.append('name', 'Autorisation');
+    formData.append('typeDocId', 3);
+  
     axios
-      .post('http://localhost:8282/document', data)
+      .post('http://localhost:8282/document', formData)
       .then((response) => {
         console.log(response.data);
       })
@@ -59,6 +58,7 @@ const ExportDocuments = () => {
         console.error(error);
       });
   };
+  
 
   return (
     <div className="container mx-auto p-4">

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Card, Input, Button, Typography } from "@material-tailwind/react";
+import {  message } from 'antd';
 
 export default function InscrireAssociation() {
   const [name, setName] = useState("");
@@ -9,13 +10,14 @@ export default function InscrireAssociation() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const userId = localStorage.getItem('userId'); // Get the userId from localStorage
 
     const data = {
       name: name,
       mail: email,
       adress: address,
       phoneNumber: phoneNumber,
-      userId: 21,
+      userId: userId,
     };
 
     try {
@@ -28,7 +30,7 @@ export default function InscrireAssociation() {
       });
 
       if (response.ok) {
-        alert("Inscription réussie !");
+        message.success('Association added successfully');
         setName("");
         setEmail("");
         setAddress("");

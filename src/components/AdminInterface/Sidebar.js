@@ -35,7 +35,18 @@ const Sidebar = () => {
             </Link>
             <Link class="flex items-center justify-start w-full p-4 my-2 font-thin text-green-500 uppercase transition-colors duration-200 border-r-4 border-green-500 bg-gradient-to-r from-white to-blue-100 dark:from-gray-700 dark:to-gray-800" to="#">
               <LogoutOutlined/>
-              <span class="mx-4 text-sm font-normal text-slate-300"> Déconnection </span>
+              <span class="mx-4 text-sm font-normal text-slate-300"
+              onClick={() => {
+                // Effacer les éléments du local storage (username, token, userId, role)
+                localStorage.removeItem('username');
+                localStorage.removeItem('token');
+                localStorage.removeItem('userId');
+                localStorage.removeItem('role');
+            
+                // Rediriger vers la page d'accueil ou une autre page de votre choix
+                window.location.href = '/';
+              }}
+              > Déconnection </span>
             </Link>
           </div>
         </nav>

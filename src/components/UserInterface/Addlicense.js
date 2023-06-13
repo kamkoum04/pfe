@@ -26,6 +26,7 @@ const AddLicense = ({ associationId }) => {
       requestTypeId: values.requestTypeId,
       statusId: statusId,
     };
+    console.log(associationId)
     try {
       const response = await axios.post('http://localhost:8282/license', requestData);
     

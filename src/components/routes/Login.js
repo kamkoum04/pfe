@@ -41,10 +41,12 @@ const Login = () => {
       localStorage.setItem('username', user);
       localStorage.setItem('token', accessToken);
       localStorage.setItem('userId', id);
+      localStorage.setItem('role',roles.id)
       setAuth({ user, pwd, roles, accessToken });
       setUser('');
       setPwd('');
       setSuccess(true);
+      
     } catch (err) {
       if (!err.response) {
         setErrMsg('No Server Response');
@@ -143,15 +145,7 @@ const Login = () => {
                   </span>
                   Sign in
                 </button>
-                <p className="text-center mt-2">
-                  Don't have an account?{" "}
-                  <Link
-                    to="/register"
-                    className="text-purple-600 hover:text-purple-700"
-                  >
-                    Register
-                  </Link>
-                </p>
+                
               </form>
             </div>
           </div>

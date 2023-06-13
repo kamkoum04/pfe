@@ -6,7 +6,10 @@ import Addlicense from './Addlicense';
 import ExportDocuments from './ExportDocuments';
 import LicensePage from './LicensePage';
 
-const Associations = ({ userId = 2 }) => {
+
+
+
+const Associations = ({   }) => {
   const [associations, setAssociations] = useState([]);
   const [isDeleted, setIsDeleted] = useState(false);
   const [editedAssociation, setEditedAssociation] = useState(null);
@@ -15,17 +18,21 @@ const Associations = ({ userId = 2 }) => {
   const [associationId, setAssociationId] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [isLicenseModalVisible, setIsLicenseModalVisible] = useState(false);
-  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false); // Nouvelle state pour la visibilité du modal de suppression
-  const [associationToDelete, setAssociationToDelete] = useState(null); // Nouvelle state pour stocker l'association à supprimer
-
+  const [isDeleteModalVisible, setIsDeleteModalVisible] = useState(false);
+  const [associationToDelete, setAssociationToDelete] = useState(null);
+   
   const fetchAssociations = async () => {
+    const userId = localStorage.getItem('userId'); 
+
     try {
       const response = await axios.get(`http://localhost:8282/association`, {
+        
         params: {
-          userId: 21
+          userId: userId
         }
       });
       const data = response.data;
+      console.log(data)
       setAssociations(data.associations);
     } catch (error) {
       console.error('Failed to fetch associations:', error);
@@ -38,18 +45,34 @@ const Associations = ({ userId = 2 }) => {
   };
 
   const confirmDeleteAssociation = async () => {
-    try {
-      const response = await axios.delete(`http://localhost:8282/association/${associationToDelete.id}`);
-      if (response.status === 200) {
-        setIsDeleted(true);
+    const response = await fetch(`http://localhost:8282/association/${associationToDelete.id}`, {
+      method: 'DELETE',
+    });
+
+    const responseData = await response.json();
+    console.log('Response code:', responseData.code);
+
+    switch (responseData.code) {
+      case '200':
         message.success('Association deleted successfully');
-      } else {
-        message.error('Failed to delete association');
-      }
-    } catch (error) {
-      console.error('Failed to delete association:', error);
-      message.error('Failed to delete association');
+        fetchAssociations();
+        break;
+      case '500':
+        switch (responseData.message) {
+          case 'delete Association failed':
+            message.error('An error occurred while deleting association');
+            break;
+          default:
+            message.error('Association has a license');
+            break;
+        }
+        break;
+      default:
+        console.error(responseData);
+        message.error('An error occurred');
+        break;
     }
+    
     setIsDeleteModalVisible(false);
   };
 
@@ -62,47 +85,50 @@ const Associations = ({ userId = 2 }) => {
     setEditedAssociation({ ...record, associationId: record.id, userId: record.userId, email: record.email });
   };
 
-const onUpdateAssociation = async () => {
-  try {
-    const response = await fetch(`http://localhost:8282/association`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        ...editedAssociation,
-        associationId: editedAssociation.associationId,
-        userId: 2,
-        mail: editedAssociation.email,
-      }),
-    });
+  const onUpdateAssociation = async () => {
+    const userId = localStorage.getItem('userId'); // Get the userId from localStorage
 
-    if (response.status === 200) {
-      message.success('Association updated successfully');
-      setIsEditing(false);
-      setEditedAssociation(null);
-      fetchAssociations();
-    } else if (response.status === 201) {
-      const errorData = await response.json();
-      message.error('Failed to update association');
-      setErrorMessage(errorData.message);
-    } else {
+    try {
+      const response = await fetch(`http://localhost:8282/association`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...editedAssociation,
+          associationId: editedAssociation.associationId,
+          userId:userId ,
+          mail: editedAssociation.email,
+        }),
+      });
+
+      if (response.status === 200) {
+        message.success('Association updated successfully');
+        setIsEditing(false);
+        setEditedAssociation(null);
+        fetchAssociations();
+      } else if (response.status === 201) {
+        const errorData = await response.json();
+        message.error('Failed to update association');
+        setErrorMessage(errorData.message);
+      } else {
+        message.error('Failed to update association');
+      }
+    } catch (error) {
+      console.log(error);
       message.error('Failed to update association');
     }
-  } catch (error) {
-    console.log(error);
-    message.error('Failed to update association');
-  }
-};
+  };
 
-  const handleLicenseModal = () => {
+  const handleLicenseModal = (associationId) => {
     setIsLicenseModalVisible(true);
+    setAssociationId(associationId);
   };
 
   const onDemandLicence = (associationId) => {
     setIsModalVisible(true);
     setAssociationId(associationId);
-    setCurrentStep(0); // Reset the stepper to the first step
+    setCurrentStep(0);
   };
 
   const clearLicenseId = () => {
@@ -111,7 +137,7 @@ const onUpdateAssociation = async () => {
 
   useEffect(() => {
     fetchAssociations();
-  }, [isDeleted, userId]);
+  }, [isDeleted]);
 
   const columns = [
     {
@@ -144,10 +170,10 @@ const onUpdateAssociation = async () => {
             <EditOutlined onClick={() => onEditingAssociation(record)} style={{ color: 'blue' }} />
           </Tooltip>
           <Tooltip title="Delete Association">
-            <DeleteOutlined onClick={() => onDeleteAssociation(record.id)} style={{ color: 'red', marginLeft: 12 }} />
+            <DeleteOutlined onClick={() => onDeleteAssociation(record)} style={{ color: 'red', marginLeft: 12 }} />
           </Tooltip>
           <Tooltip title="View License">
-            <FileTextOutlined style={{ color: 'green', marginLeft: 12 }} onClick={handleLicenseModal} />
+            <FileTextOutlined style={{ color: 'green', marginLeft: 12 }} onClick={() => handleLicenseModal(record.id)}  />
           </Tooltip>
           <Button
             type="primary"
@@ -196,7 +222,7 @@ const onUpdateAssociation = async () => {
         />
         <Input
           value={editedAssociation?.adress}
-          onChange={(e) => setEditedAssociation({ ...editedAssociation, address: e.target.value })}
+          onChange={(e) => setEditedAssociation({ ...editedAssociation, adress: e.target.value })}
         />
         <Input
           value={editedAssociation?.email}
@@ -219,8 +245,11 @@ const onUpdateAssociation = async () => {
             Finish
           </Button>,
         ]}
+        width={800}
+        height={600}
+        
       >
-        <LicensePage/> 
+        <LicensePage associationId={associationId}/> 
       </Modal>
       <Modal
         title="Demande de Licence"
@@ -250,7 +279,7 @@ const onUpdateAssociation = async () => {
             className="text-black"
             onClick={() => {
               setIsModalVisible(false);
-              clearLicenseId(); // Appel de la fonction pour vider l'élément du stockage local
+              clearLicenseId();
             }}
           >
             Finish
@@ -258,7 +287,7 @@ const onUpdateAssociation = async () => {
         ]}
         width={600}
       >
-        <ExportDocuments licenseId={associationId} />
+        <ExportDocuments  />
       </Modal>
       <Modal
         title="Confirm Association Deletion"

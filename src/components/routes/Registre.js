@@ -211,7 +211,7 @@ const Registre = () => {
           <div className="pt-12 pb-12 text-center">
             <p>
               Already have an account?
-              <Link to="/login" className="font-semibold underline">
+              <Link to="/" className="font-semibold underline">
                 Sign in.
               </Link>
             </p>

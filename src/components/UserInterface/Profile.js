@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { message, Modal, Input } from 'antd';
+import axios from 'axios';
 
 const ProfilePage = () => {
   const [username, setUsername] = useState('');
@@ -11,16 +12,18 @@ const ProfilePage = () => {
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
-
-
   useEffect(() => {
-    fetch('http://localhost:8282/user/filter')
-      .then(response => response.json())
-      .then(data => {
-        const user = data.users.find(user => user.username === 'hamza');
+    axios.get('http://localhost:8282/user/filter')
+      .then(response => {
+        const userId = localStorage.getItem('userId'); 
+        const user = response.data.users.find(user => user.id === parseInt(userId)); 
         if (user) {
           setUserData(user);
         }
+      })
+      .catch(error => {
+        console.error(error);
+        message.error('An error occurred');
       });
   }, []);
 
@@ -33,6 +36,7 @@ const ProfilePage = () => {
   };
   
   const handleSubmit = (event) => {
+    const userId = localStorage.getItem('userId'); 
     event.preventDefault();
   
     const data = {
@@ -42,7 +46,7 @@ const ProfilePage = () => {
       phoneNumber: phoneNumber,
       pwd: '',
       townId: 0,
-      userId: 2,
+      userId: userId,
       userRoleDtos: [
         {
           roleId: 2,
@@ -52,81 +56,70 @@ const ProfilePage = () => {
     };
   
     console.log('Request Payload:', data);
+
   
-    fetch('http://localhost:8282/user', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
+    axios.put('http://localhost:8282/user', data)
+    .then((response) => {
+      const code = response.data.code;
+      if (code === '200') {
+        message.success("Modifications saved successfully");
+        
+      } else if (code === '500') {
+        throw new Error('Failed to save modifications');
+      } else {
+        throw new Error('Unknown error occurred');
+      }
     })
-      .then((response) => {
-        if (response.ok) {
-          message.success('Modifications saved successfully');
-        } else {
-          message.error('Failed to save modifications');
-        }
-        return response.json();
-      })
-      .then((responseData) => {
-        console.log('Response Data:', responseData);
-      })
       .catch((error) => {
         console.error(error);
-        message.error('An error occurred');
+        message.error('Failed to save modifications');
+        console.log(response.data.code)
+
       });
   };
+  
   const handlePasswordModalOpen = () => {
     setShowPasswordModal(true);
   };
+  
   const handlePasswordModalClose = () => {
     setShowPasswordModal(false);
   };
+  
   const handlePasswordUpdate = () => {
-    const data = {
-      id: 2,
-      newPassword: newPassword,
-      oldPassword: oldPassword,
-    };
-  
-    console.log('Request Payload:', data);
-  
-    fetch('http://localhost:8282/user/updatePassword/2', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => {
-        if (response.status === 200) {
-          return response.json();
-        } else {
-          throw new Error('Failed to update password');
-        }
-      })
-      .then((responseData) => {
-        console.log('Response Data:', responseData);
-        message.success(responseData.message); // Display the success message from the response data
-        // Clear password form fields
-        setOldPassword('');
-        setNewPassword('');
-      })
-      .catch((error) => {
-        console.error(error);
-        message.error(
-          'An error occurred',
-          () => {}, // Empty callback to remove the default close button
-          { style: { background: 'red' } } // Set the background color of the error message to red
-        );
-      });
+  const userId = localStorage.getItem('userId'); // Get the userId from localStorage
+
+  const data = {
+    id: parseInt(userId),
+    newPassword: newPassword,
+    oldPassword: oldPassword,
   };
 
-  
-  
-  
-  
-  
+  console.log('Request Payload:', data);
+
+  axios.put(`http://localhost:8282/user/updatePassword/${userId}`, data)
+    .then((response) => {
+      const code = response.data.code;
+      if (code === '200') {
+        message.success("Password updated successfully");
+        setOldPassword('');
+        setNewPassword('');
+      } else if (code === '500') {
+        throw new Error('Failed to update password');
+      } else {
+        throw new Error('Unknown error occurred');
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+      message.error(
+        'Failed to update password ',
+        () => {},
+        { style: { background: 'red' } }
+      );
+    });
+};
+
   
   
   

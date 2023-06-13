@@ -2,7 +2,6 @@ import React from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import Content from './Content';
-import Footer from '../Footer/Footer';
 
 const AdminInterface = () => {
   return (
