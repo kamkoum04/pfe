@@ -104,6 +104,7 @@ const ProfilePage = () => {
         message.success("Password updated successfully");
         setOldPassword('');
         setNewPassword('');
+        setShowPasswordModal(false);
       } else if (code === '500') {
         throw new Error('Failed to update password');
       } else {

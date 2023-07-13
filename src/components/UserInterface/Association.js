@@ -9,7 +9,7 @@ import LicensePage from './LicensePage';
 
 
 
-const Associations = ({   }) => {
+const Associations = () => {
   const [associations, setAssociations] = useState([]);
   const [isDeleted, setIsDeleted] = useState(false);
   const [editedAssociation, setEditedAssociation] = useState(null);

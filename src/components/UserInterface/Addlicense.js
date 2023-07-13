@@ -79,12 +79,11 @@ const AddLicense = ({ associationId }) => {
 
   const updateMemberField = (index, field, value) => {
     const newMembers = [...members];
-    const updatedMember = { ...newMembers[index], [field]: field === 'responsibilityId' ? Number(value) : value };
+    const updatedMember = { ...newMembers[index], [field]: value };
     newMembers[index] = updatedMember;
     setMembers(newMembers);
-
-    localStorage.setItem('licenseMembers', JSON.stringify(newMembers));
   };
+  
 
   return (
     <StyledForm form={form} onFinish={handleSubmit}>
@@ -92,7 +91,7 @@ const AddLicense = ({ associationId }) => {
         <Select placeholder="Select Request Type">
           <Option value="1">Request license</Option>
           <Option value="2" disabled>Renewal of license</Option>
-          
+
         </Select>
       </Form.Item>
 
